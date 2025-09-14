@@ -13,9 +13,31 @@ function doGet(e) {
     // Get the page parameter, default to 'dashboard'
     const page = e.parameter.page || 'dashboard';
 
-    // Always serve the main dashboard - it handles all navigation internally
-    const htmlFile = 'Index';
-    const title = 'IT Asset Management System';
+    let htmlFile;
+    let title;
+
+    // Route to appropriate page
+    switch (page.toLowerCase()) {
+      case 'inventory':
+        htmlFile = 'Inventory';
+        title = 'Asset Inventory Management';
+        break;
+      case 'accountability':
+        htmlFile = 'Accountability';
+        title = 'Asset Accountability Form';
+        break;
+      case 'disposal':
+        htmlFile = 'Disposal';
+        title = 'Asset Disposal Management';
+        break;
+      case 'reports':
+        htmlFile = 'Reports';
+        title = 'Reports & Analytics';
+        break;
+      default:
+        htmlFile = 'Index';
+        title = 'IT Asset Management Dashboard';
+    }
 
     // Create HTML output
     const html = HtmlService.createTemplateFromFile(htmlFile);
