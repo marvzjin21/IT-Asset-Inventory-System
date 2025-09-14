@@ -6,7 +6,7 @@
 // Google Sheets Configuration
 const CONFIG = {
   // Replace with your Google Sheets ID (found in the URL)
-  SPREADSHEET_ID: 'YOUR_SPREADSHEET_ID_HERE',
+  SPREADSHEET_ID: '6z_0iolU6CaG5FyIdOM8HkEvq0-fm4b_fq57OWnhdkY',
 
   // Sheet names - these will be created automatically
   SHEETS: {
@@ -20,7 +20,7 @@ const CONFIG = {
 
   // Google Drive folder for storing PDFs
   // Replace with your Google Drive folder ID
-  PDF_FOLDER_ID: 'YOUR_PDF_FOLDER_ID_HERE',
+  PDF_FOLDER_ID: '1fsda1JptqNx7tvLYNVhYWrKmtb9oBgNP',
 
   // Email settings
   EMAIL: {

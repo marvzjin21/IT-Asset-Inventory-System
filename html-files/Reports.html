@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports & Analytics</title>
+    <?!= include('Styles'); ?>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="nav-brand">
+                <h2>IT Asset Management</h2>
+            </div>
+            <div class="nav-links">
+                <a href="?page=dashboard">Dashboard</a>
+                <a href="?page=inventory">Inventory</a>
+                <a href="?page=accountability">Accountability</a>
+                <a href="?page=disposal">Disposal</a>
+                <a href="?page=reports" class="active">Reports</a>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="page-header">
+                <h1>Reports & Analytics</h1>
+                <div class="header-actions">
+                    <button id="exportBtn" class="btn btn-primary">
+                        <i class="icon">📊</i> Export Report
+                    </button>
+                    <button id="refreshBtn" class="btn btn-secondary">
+                        <i class="icon">🔄</i> Refresh Data
+                    </button>
+                </div>
+            </div>
+
+            <!-- Report Filters -->
+            <div class="filters-section">
+                <div class="filter-group">
+                    <label for="reportType">Report Type:</label>
+                    <select id="reportType">
+                        <option value="overview">Overview</option>
+                        <option value="detailed">Detailed Analysis</option>
+                        <option value="compliance">Compliance Report</option>
+                        <option value="financial">Financial Summary</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="dateRange">Date Range:</label>
+                    <select id="dateRange">
+                        <option value="all">All Time</option>
+                        <option value="last30">Last 30 Days</option>
+                        <option value="last90">Last 90 Days</option>
+                        <option value="lastyear">Last Year</option>
+                        <option value="custom">Custom Range</option>
+                    </select>
+                </div>
+                <div class="filter-group" id="customDateGroup" style="display: none;">
+                    <label for="startDate">From:</label>
+                    <input type="date" id="startDate">
+                    <label for="endDate">To:</label>
+                    <input type="date" id="endDate">
+                </div>
+                <div class="filter-group">
+                    <label for="categoryFilter">Category:</label>
+                    <select id="categoryFilter">
+                        <option value="">All Categories</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="summary-cards">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Total Assets</h3>
+                        <i class="card-icon">💻</i>
+                    </div>
+                    <div class="card-value" id="totalAssets">-</div>
+                    <div class="card-change" id="totalAssetsChange">-</div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Available</h3>
+                        <i class="card-icon">✅</i>
+                    </div>
+                    <div class="card-value" id="availableAssets">-</div>
+                    <div class="card-change" id="availableAssetsChange">-</div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Assigned</h3>
+                        <i class="card-icon">👤</i>
+                    </div>
+                    <div class="card-value" id="assignedAssets">-</div>
+                    <div class="card-change" id="assignedAssetsChange">-</div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Total Value</h3>
+                        <i class="card-icon">💰</i>
+                    </div>
+                    <div class="card-value" id="totalValue">-</div>
+                    <div class="card-change" id="totalValueChange">-</div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="charts-section">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>Asset Status Distribution</h3>
+                        <div class="chart-controls">
+                            <select id="statusChartType">
+                                <option value="doughnut">Doughnut Chart</option>
+                                <option value="bar">Bar Chart</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>Asset Categories</h3>
+                        <div class="chart-controls">
+                            <select id="categoryChartType">
+                                <option value="pie">Pie Chart</option>
+                                <option value="horizontalBar">Horizontal Bar</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container full-width">
+                    <div class="chart-header">
+                        <h3>Asset Acquisition Timeline</h3>
+                        <div class="chart-controls">
+                            <select id="timelinePeriod">
+                                <option value="monthly">Monthly</option>
+                                <option value="quarterly">Quarterly</option>
+                                <option value="yearly">Yearly</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="timelineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Tables -->
+            <div class="tables-section">
+                <!-- Asset Condition Report -->
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3>Asset Condition Report</h3>
+                        <button class="btn btn-sm btn-secondary" onclick="exportTable('conditionTable', 'asset_condition_report')">
+                            Export CSV
+                        </button>
+                    </div>
+                    <table id="conditionTable" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Condition</th>
+                                <th>Count</th>
+                                <th>Percentage</th>
+                                <th>Total Value</th>
+                                <th>Avg. Age (Years)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="conditionTableBody">
+                            <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Top Assets by Value -->
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3>Top Assets by Value</h3>
+                        <button class="btn btn-sm btn-secondary" onclick="exportTable('valueTable', 'top_assets_by_value')">
+                            Export CSV
+                        </button>
+                    </div>
+                    <table id="valueTable" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Asset Tag</th>
+                                <th>Category</th>
+                                <th>Brand & Model</th>
+                                <th>Purchase Price</th>
+                                <th>Current Value</th>
+                                <th>Age</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="valueTableBody">
+                            <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Asset Utilization Report -->
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3>Asset Utilization by Department</h3>
+                        <button class="btn btn-sm btn-secondary" onclick="exportTable('utilizationTable', 'asset_utilization_report')">
+                            Export CSV
+                        </button>
+                    </div>
+                    <table id="utilizationTable" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Department</th>
+                                <th>Assets Assigned</th>
+                                <th>Total Value</th>
+                                <th>Utilization Rate</th>
+                                <th>Avg. Asset Age</th>
+                            </tr>
+                        </thead>
+                        <tbody id="utilizationTableBody">
+                            <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Warranty Expiration Report -->
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3>Warranty Expiration Report</h3>
+                        <button class="btn btn-sm btn-secondary" onclick="exportTable('warrantyTable', 'warranty_expiration_report')">
+                            Export CSV
+                        </button>
+                    </div>
+                    <table id="warrantyTable" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Asset Tag</th>
+                                <th>Category</th>
+                                <th>Brand & Model</th>
+                                <th>Warranty Expires</th>
+                                <th>Days Until Expiry</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="warrantyTableBody">
+                            <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Compliance Section -->
+            <div class="compliance-section">
+                <h3>Compliance & Audit Trail</h3>
+                <div class="compliance-grid">
+                    <div class="compliance-card">
+                        <h4>Data Security</h4>
+                        <div class="compliance-metric">
+                            <span class="metric-value" id="securityCompliance">-</span>
+                            <span class="metric-label">Assets Compliant</span>
+                        </div>
+                        <div class="compliance-details">
+                            <p>All disposed assets with proper data wiping</p>
+                        </div>
+                    </div>
+                    <div class="compliance-card">
+                        <h4>Asset Tracking</h4>
+                        <div class="compliance-metric">
+                            <span class="metric-value" id="trackingCompliance">-</span>
+                            <span class="metric-label">Tracked Assets</span>
+                        </div>
+                        <div class="compliance-details">
+                            <p>Assets with complete accountability records</p>
+                        </div>
+                    </div>
+                    <div class="compliance-card">
+                        <h4>Documentation</h4>
+                        <div class="compliance-metric">
+                            <span class="metric-value" id="documentationCompliance">-</span>
+                            <span class="metric-label">Documented</span>
+                        </div>
+                        <div class="compliance-details">
+                            <p>Assets with complete documentation</p>
+                        </div>
+                    </div>
+                    <div class="compliance-card">
+                        <h4>Approval Workflow</h4>
+                        <div class="compliance-metric">
+                            <span class="metric-value" id="approvalCompliance">-</span>
+                            <span class="metric-label">Approved</span>
+                        </div>
+                        <div class="compliance-details">
+                            <p>Disposals with proper approval workflow</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Indicator -->
+            <div id="loadingIndicator" class="loading hidden">
+                <div class="spinner"></div>
+                <p>Generating report...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div id="exportModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Export Report</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="export-options">
+                    <h4>Export Format:</h4>
+                    <div class="format-options">
+                        <label class="radio-option">
+                            <input type="radio" name="exportFormat" value="pdf" checked>
+                            <span>PDF Report</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="exportFormat" value="excel">
+                            <span>Excel Spreadsheet</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="exportFormat" value="csv">
+                            <span>CSV Data</span>
+                        </label>
+                    </div>
+                    <h4>Include:</h4>
+                    <div class="include-options">
+                        <label class="checkbox-option">
+                            <input type="checkbox" id="includeSummary" checked>
+                            <span>Summary Statistics</span>
+                        </label>
+                        <label class="checkbox-option">
+                            <input type="checkbox" id="includeCharts" checked>
+                            <span>Charts and Graphs</span>
+                        </label>
+                        <label class="checkbox-option">
+                            <input type="checkbox" id="includeTables" checked>
+                            <span>Detailed Tables</span>
+                        </label>
+                        <label class="checkbox-option">
+                            <input type="checkbox" id="includeCompliance">
+                            <span>Compliance Report</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary close">Cancel</button>
+                    <button type="button" id="generateExportBtn" class="btn btn-primary">Generate Export</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let reportData = {};
+        let charts = {};
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeFilters();
+            setupEventListeners();
+            loadReportData();
+        });
+
+        // Initialize filter dropdowns
+        function initializeFilters() {
+            const categories = <?= JSON.stringify(config.CATEGORIES) ?>;
+            populateSelect('categoryFilter', categories);
+        }
+
+        // Populate select dropdown
+        function populateSelect(selectId, options) {
+            const select = document.getElementById(selectId);
+            options.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option;
+                optionElement.textContent = option;
+                select.appendChild(optionElement);
+            });
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Filter controls
+            document.getElementById('reportType').addEventListener('change', loadReportData);
+            document.getElementById('dateRange').addEventListener('change', handleDateRangeChange);
+            document.getElementById('categoryFilter').addEventListener('change', loadReportData);
+            document.getElementById('startDate').addEventListener('change', loadReportData);
+            document.getElementById('endDate').addEventListener('change', loadReportData);
+
+            // Chart type controls
+            document.getElementById('statusChartType').addEventListener('change', updateStatusChart);
+            document.getElementById('categoryChartType').addEventListener('change', updateCategoryChart);
+            document.getElementById('timelinePeriod').addEventListener('change', updateTimelineChart);
+
+            // Action buttons
+            document.getElementById('exportBtn').addEventListener('click', openExportModal);
+            document.getElementById('refreshBtn').addEventListener('click', loadReportData);
+            document.getElementById('generateExportBtn').addEventListener('click', generateExport);
+
+            // Modal controls
+            document.querySelectorAll('.close').forEach(btn => {
+                btn.addEventListener('click', closeModals);
+            });
+
+            // Close modal when clicking outside
+            window.addEventListener('click', function(e) {
+                if (e.target.classList.contains('modal')) {
+                    closeModals();
+                }
+            });
+        }
+
+        // Handle date range change
+        function handleDateRangeChange() {
+            const dateRange = document.getElementById('dateRange').value;
+            const customGroup = document.getElementById('customDateGroup');
+
+            if (dateRange === 'custom') {
+                customGroup.style.display = 'flex';
+            } else {
+                customGroup.style.display = 'none';
+                loadReportData();
+            }
+        }
+
+        // Load report data
+        function loadReportData() {
+            showLoading(true);
+
+            const filters = {
+                reportType: document.getElementById('reportType').value,
+                dateRange: document.getElementById('dateRange').value,
+                categoryFilter: document.getElementById('categoryFilter').value,
+                startDate: document.getElementById('startDate').value,
+                endDate: document.getElementById('endDate').value
+            };
+
+            google.script.run
+                .withSuccessHandler(function(data) {
+                    reportData = data;
+                    updateDashboard();
+                    updateCharts();
+                    updateTables();
+                    updateCompliance();
+                    showLoading(false);
+                })
+                .withFailureHandler(function(error) {
+                    console.error('Error loading report data:', error);
+                    showError('Failed to load report data: ' + error.message);
+                    showLoading(false);
+                })
+                .getReportData(filters);
+        }
+
+        // Update dashboard summary cards
+        function updateDashboard() {
+            if (!reportData.summary) return;
+
+            const summary = reportData.summary;
+            document.getElementById('totalAssets').textContent = summary.totalAssets || '0';
+            document.getElementById('availableAssets').textContent = summary.availableAssets || '0';
+            document.getElementById('assignedAssets').textContent = summary.assignedAssets || '0';
+            document.getElementById('totalValue').textContent = formatCurrency(summary.totalValue || 0);
+
+            // Update change indicators (if available)
+            updateChangeIndicator('totalAssetsChange', summary.totalAssetsChange);
+            updateChangeIndicator('availableAssetsChange', summary.availableAssetsChange);
+            updateChangeIndicator('assignedAssetsChange', summary.assignedAssetsChange);
+            updateChangeIndicator('totalValueChange', summary.totalValueChange);
+        }
+
+        // Update change indicator
+        function updateChangeIndicator(elementId, change) {
+            const element = document.getElementById(elementId);
+            if (!change) {
+                element.textContent = '';
+                return;
+            }
+
+            const isPositive = change > 0;
+            element.textContent = (isPositive ? '+' : '') + change;
+            element.className = 'card-change ' + (isPositive ? 'positive' : 'negative');
+        }
+
+        // Update charts
+        function updateCharts() {
+            updateStatusChart();
+            updateCategoryChart();
+            updateTimelineChart();
+        }
+
+        // Update status chart
+        function updateStatusChart() {
+            const ctx = document.getElementById('statusChart').getContext('2d');
+            const chartType = document.getElementById('statusChartType').value;
+
+            if (charts.status) {
+                charts.status.destroy();
+            }
+
+            if (!reportData.statusDistribution) return;
+
+            const data = reportData.statusDistribution;
+            charts.status = new Chart(ctx, {
+                type: chartType,
+                data: {
+                    labels: data.labels || [],
+                    datasets: [{
+                        data: data.values || [],
+                        backgroundColor: [
+                            '#28a745', // Available - Green
+                            '#ffc107', // Assigned - Yellow
+                            '#fd7e14', // Under Maintenance - Orange
+                            '#17a2b8', // Reserved - Teal
+                            '#dc3545', // Disposed - Red
+                            '#6c757d'  // Lost/Stolen - Gray
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: chartType === 'doughnut' ? 'right' : 'top'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update category chart
+        function updateCategoryChart() {
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            const chartType = document.getElementById('categoryChartType').value;
+
+            if (charts.category) {
+                charts.category.destroy();
+            }
+
+            if (!reportData.categoryDistribution) return;
+
+            const data = reportData.categoryDistribution;
+            charts.category = new Chart(ctx, {
+                type: chartType,
+                data: {
+                    labels: data.labels || [],
+                    datasets: [{
+                        data: data.values || [],
+                        backgroundColor: generateColors(data.labels?.length || 0)
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: chartType === 'pie' ? 'right' : 'top'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update timeline chart
+        function updateTimelineChart() {
+            const ctx = document.getElementById('timelineChart').getContext('2d');
+            const period = document.getElementById('timelinePeriod').value;
+
+            if (charts.timeline) {
+                charts.timeline.destroy();
+            }
+
+            if (!reportData.timeline) return;
+
+            const data = reportData.timeline[period];
+            if (!data) return;
+
+            charts.timeline = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.labels || [],
+                    datasets: [{
+                        label: 'Assets Acquired',
+                        data: data.values || [],
+                        borderColor: '#007bff',
+                        backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update tables
+        function updateTables() {
+            updateConditionTable();
+            updateValueTable();
+            updateUtilizationTable();
+            updateWarrantyTable();
+        }
+
+        // Update condition table
+        function updateConditionTable() {
+            const tbody = document.getElementById('conditionTableBody');
+            if (!reportData.conditionReport) {
+                tbody.innerHTML = '<tr><td colspan="5">No data available</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = reportData.conditionReport.map(item => `
+                <tr>
+                    <td><span class="condition-badge condition-${item.condition.toLowerCase().replace(' ', '-')}">${item.condition}</span></td>
+                    <td>${item.count}</td>
+                    <td>${item.percentage}%</td>
+                    <td>${formatCurrency(item.totalValue)}</td>
+                    <td>${item.avgAge || 'N/A'}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Update value table
+        function updateValueTable() {
+            const tbody = document.getElementById('valueTableBody');
+            if (!reportData.topValueAssets) {
+                tbody.innerHTML = '<tr><td colspan="7">No data available</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = reportData.topValueAssets.map(asset => `
+                <tr>
+                    <td>${asset['Asset Tag']}</td>
+                    <td>${asset['Category']}</td>
+                    <td>${asset['Brand']} ${asset['Model']}</td>
+                    <td>${formatCurrency(asset['Purchase Price'])}</td>
+                    <td>${formatCurrency(asset['Current Value'])}</td>
+                    <td>${asset['Age'] || 'N/A'}</td>
+                    <td><span class="status-badge status-${(asset['Status'] || '').toLowerCase().replace(' ', '-')}">${asset['Status']}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        // Update utilization table
+        function updateUtilizationTable() {
+            const tbody = document.getElementById('utilizationTableBody');
+            if (!reportData.utilizationReport) {
+                tbody.innerHTML = '<tr><td colspan="5">No data available</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = reportData.utilizationReport.map(dept => `
+                <tr>
+                    <td>${dept.department}</td>
+                    <td>${dept.assetsAssigned}</td>
+                    <td>${formatCurrency(dept.totalValue)}</td>
+                    <td>${dept.utilizationRate}%</td>
+                    <td>${dept.avgAge || 'N/A'}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Update warranty table
+        function updateWarrantyTable() {
+            const tbody = document.getElementById('warrantyTableBody');
+            if (!reportData.warrantyReport) {
+                tbody.innerHTML = '<tr><td colspan="6">No data available</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = reportData.warrantyReport.map(asset => `
+                <tr>
+                    <td>${asset['Asset Tag']}</td>
+                    <td>${asset['Category']}</td>
+                    <td>${asset['Brand']} ${asset['Model']}</td>
+                    <td>${formatDate(asset['Warranty Expiry'])}</td>
+                    <td class="${asset.daysUntilExpiry < 30 ? 'text-danger' : asset.daysUntilExpiry < 90 ? 'text-warning' : ''}">${asset.daysUntilExpiry}</td>
+                    <td><span class="warranty-status ${asset.warrantyStatus.toLowerCase()}">${asset.warrantyStatus}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        // Update compliance metrics
+        function updateCompliance() {
+            if (!reportData.compliance) return;
+
+            const compliance = reportData.compliance;
+            document.getElementById('securityCompliance').textContent = compliance.securityCompliance + '%';
+            document.getElementById('trackingCompliance').textContent = compliance.trackingCompliance + '%';
+            document.getElementById('documentationCompliance').textContent = compliance.documentationCompliance + '%';
+            document.getElementById('approvalCompliance').textContent = compliance.approvalCompliance + '%';
+        }
+
+        // Open export modal
+        function openExportModal() {
+            document.getElementById('exportModal').classList.remove('hidden');
+        }
+
+        // Generate export
+        function generateExport() {
+            const format = document.querySelector('input[name="exportFormat"]:checked').value;
+            const options = {
+                format: format,
+                includeSummary: document.getElementById('includeSummary').checked,
+                includeCharts: document.getElementById('includeCharts').checked,
+                includeTables: document.getElementById('includeTables').checked,
+                includeCompliance: document.getElementById('includeCompliance').checked,
+                filters: {
+                    reportType: document.getElementById('reportType').value,
+                    dateRange: document.getElementById('dateRange').value,
+                    categoryFilter: document.getElementById('categoryFilter').value
+                }
+            };
+
+            showLoading(true);
+            closeModals();
+
+            google.script.run
+                .withSuccessHandler(function(response) {
+                    showLoading(false);
+                    if (response.success) {
+                        showSuccess('Report exported successfully. Check your Google Drive for the file.');
+                    } else {
+                        showError(response.message);
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    showLoading(false);
+                    showError('Failed to export report: ' + error.message);
+                })
+                .exportReport(options);
+        }
+
+        // Export table as CSV
+        function exportTable(tableId, filename) {
+            const table = document.getElementById(tableId);
+            const csv = tableToCSV(table);
+            downloadCSV(csv, filename + '_' + new Date().toISOString().split('T')[0] + '.csv');
+        }
+
+        // Convert table to CSV
+        function tableToCSV(table) {
+            const rows = Array.from(table.querySelectorAll('tr'));
+            return rows.map(row => {
+                const cells = Array.from(row.querySelectorAll('th, td'));
+                return cells.map(cell => '"' + cell.textContent.replace(/"/g, '""') + '"').join(',');
+            }).join('\n');
+        }
+
+        // Download CSV file
+        function downloadCSV(csv, filename) {
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Utility functions
+        function generateColors(count) {
+            const colors = [
+                '#007bff', '#28a745', '#ffc107', '#dc3545', '#17a2b8',
+                '#6f42c1', '#fd7e14', '#20c997', '#6c757d', '#f8f9fa'
+            ];
+            return Array.from({length: count}, (_, i) => colors[i % colors.length]);
+        }
+
+        function formatCurrency(value) {
+            if (!value) return '$0.00';
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+            }).format(value);
+        }
+
+        function formatDate(dateValue) {
+            if (!dateValue) return '';
+            return new Date(dateValue).toLocaleDateString();
+        }
+
+        function showLoading(show) {
+            document.getElementById('loadingIndicator').classList.toggle('hidden', !show);
+        }
+
+        function showError(message) {
+            alert('Error: ' + message);
+        }
+
+        function showSuccess(message) {
+            alert('Success: ' + message);
+        }
+
+        function closeModals() {
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.classList.add('hidden');
+            });
+        }
+    </script>
+
+    <style>
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .filters-section {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .filter-group label {
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-header h3 {
+            margin: 0;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #6c757d;
+            text-transform: uppercase;
+        }
+
+        .card-icon {
+            font-size: 1.5rem;
+        }
+
+        .card-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .card-change {
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .card-change.positive {
+            color: #28a745;
+        }
+
+        .card-change.negative {
+            color: #dc3545;
+        }
+
+        .charts-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+        }
+
+        .chart-container.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .chart-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+
+        .tables-section {
+            display: grid;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .table-header h3 {
+            margin: 0;
+        }
+
+        .compliance-section {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 2rem;
+        }
+
+        .compliance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .compliance-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .compliance-card h4 {
+            margin: 0 0 1rem 0;
+            color: #495057;
+        }
+
+        .compliance-metric {
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-value {
+            display: block;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .metric-label {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+
+        .compliance-details {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+
+        .export-options {
+            margin-bottom: 1rem;
+        }
+
+        .export-options h4 {
+            margin: 1rem 0 0.5rem 0;
+        }
+
+        .format-options,
+        .include-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .radio-option,
+        .checkbox-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .condition-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+        }
+
+        .condition-brand-new { background-color: #28a745; color: white; }
+        .condition-excellent { background-color: #20c997; color: white; }
+        .condition-good { background-color: #17a2b8; color: white; }
+        .condition-fair { background-color: #ffc107; color: black; }
+        .condition-poor { background-color: #fd7e14; color: white; }
+        .condition-needs-repair { background-color: #dc3545; color: white; }
+        .condition-obsolete { background-color: #6c757d; color: white; }
+
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-available { background-color: #28a745; color: white; }
+        .status-assigned { background-color: #ffc107; color: black; }
+        .status-under-maintenance { background-color: #fd7e14; color: white; }
+        .status-disposed { background-color: #dc3545; color: white; }
+
+        .warranty-status {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .warranty-status.active { background-color: #28a745; color: white; }
+        .warranty-status.expiring { background-color: #ffc107; color: black; }
+        .warranty-status.expired { background-color: #dc3545; color: white; }
+
+        .text-danger { color: #dc3545 !important; }
+        .text-warning { color: #ffc107 !important; }
+
+        @media (max-width: 768px) {
+            .filters-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-cards {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+
+            .compliance-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+        }
+    </style>
+</body>
+</html>
