@@ -6,7 +6,7 @@
 // Google Sheets Configuration
 const CONFIG = {
   // Replace with your Google Sheets ID (found in the URL)
-  SPREADSHEET_ID: '6z_0iolU6CaG5FyIdOM8HkEvq0-fm4b_fq57OWnhdkY',
+  SPREADSHEET_ID: '16z_0iolU6CaG5FyIdOM8HkEvq0-fm4b_fq57OWnhdkY',
 
   // Sheet names - these will be created automatically
   SHEETS: {
