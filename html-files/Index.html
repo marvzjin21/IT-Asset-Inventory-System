@@ -20,27 +20,27 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto">
                         <li class="nav-item">
-                            <a class="nav-link active" href="?page=dashboard">
+                            <a class="nav-link active" href="#" onclick="showPage('dashboard')">
                                 <i class="fas fa-tachometer-alt"></i> Dashboard
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="?page=inventory">
+                            <a class="nav-link" href="#" onclick="showPage('inventory')">
                                 <i class="fas fa-boxes"></i> Inventory
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="?page=accountability">
+                            <a class="nav-link" href="#" onclick="showPage('accountability')">
                                 <i class="fas fa-clipboard-check"></i> Accountability
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="?page=disposal">
+                            <a class="nav-link" href="#" onclick="showPage('disposal')">
                                 <i class="fas fa-trash-alt"></i> Disposal
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="?page=reports">
+                            <a class="nav-link" href="#" onclick="showPage('reports')">
                                 <i class="fas fa-chart-bar"></i> Reports
                             </a>
                         </li>
@@ -57,15 +57,19 @@
             <!-- System Alerts -->
             <div id="alertsContainer" class="mb-4"></div>
 
-            <!-- Dashboard Header -->
-            <div class="row mb-4">
-                <div class="col-12">
-                    <h1 class="h3">
-                        <i class="fas fa-tachometer-alt"></i> Dashboard
-                        <small class="text-muted">IT Asset Inventory Overview</small>
-                    </h1>
-                </div>
-            </div>
+            <!-- Page Content Container -->
+            <div id="pageContent">
+                <!-- Dashboard Page (default) -->
+                <div id="dashboardPage" class="page-content">
+                    <!-- Dashboard Header -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h1 class="h3">
+                                <i class="fas fa-tachometer-alt"></i> Dashboard
+                                <small class="text-muted">IT Asset Inventory Overview</small>
+                            </h1>
+                        </div>
+                    </div>
 
             <!-- Key Metrics Cards -->
             <div class="row mb-4">
@@ -253,6 +257,77 @@
                     </div>
                 </div>
             </div>
+                </div>
+                <!-- End Dashboard Page -->
+
+                <!-- Inventory Page -->
+                <div id="inventoryPage" class="page-content" style="display: none;">
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h1 class="h3">
+                                <i class="fas fa-boxes"></i> Asset Inventory
+                                <small class="text-muted">Manage IT Assets</small>
+                            </h1>
+                        </div>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Inventory Management:</strong> This section will allow you to add, edit, and manage your IT assets.
+                        The full inventory interface will be implemented based on your specific requirements.
+                    </div>
+                </div>
+
+                <!-- Accountability Page -->
+                <div id="accountabilityPage" class="page-content" style="display: none;">
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h1 class="h3">
+                                <i class="fas fa-clipboard-check"></i> Asset Accountability
+                                <small class="text-muted">Employee Asset Assignments</small>
+                            </h1>
+                        </div>
+                    </div>
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i>
+                        <strong>Accountability Forms:</strong> This section will handle asset assignments to employees with digital forms and signatures.
+                        The full accountability interface will be implemented based on your workflow requirements.
+                    </div>
+                </div>
+
+                <!-- Disposal Page -->
+                <div id="disposalPage" class="page-content" style="display: none;">
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h1 class="h3">
+                                <i class="fas fa-trash-alt"></i> Asset Disposal
+                                <small class="text-muted">Disposal Management</small>
+                            </h1>
+                        </div>
+                    </div>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Disposal Management:</strong> This section will handle asset disposal requests with approval workflows.
+                        The full disposal interface will be implemented based on your approval process.
+                    </div>
+                </div>
+
+                <!-- Reports Page -->
+                <div id="reportsPage" class="page-content" style="display: none;">
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h1 class="h3">
+                                <i class="fas fa-chart-bar"></i> Reports & Analytics
+                                <small class="text-muted">System Reports</small>
+                            </h1>
+                        </div>
+                    </div>
+                    <div class="alert alert-primary">
+                        <i class="fas fa-chart-line"></i>
+                        <strong>Reports & Analytics:</strong> This section will provide comprehensive reporting and analytics.
+                        The full reports interface will be implemented based on your reporting needs.
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -266,8 +341,57 @@
 
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', function() {
+            showPage('dashboard');
             loadDashboardData();
         });
+
+        // Page navigation function
+        function showPage(pageId) {
+            // Hide all pages
+            const pages = document.querySelectorAll('.page-content');
+            pages.forEach(page => {
+                page.style.display = 'none';
+            });
+
+            // Remove active class from all nav links
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+            });
+
+            // Show selected page
+            const targetPage = document.getElementById(pageId + 'Page');
+            if (targetPage) {
+                targetPage.style.display = 'block';
+            }
+
+            // Set active nav link
+            const activeLink = document.querySelector(`a[onclick="showPage('${pageId}')"]`);
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+
+            // Load page-specific data if needed
+            switch (pageId) {
+                case 'dashboard':
+                    if (Object.keys(dashboardData).length === 0) {
+                        loadDashboardData();
+                    }
+                    break;
+                case 'inventory':
+                    // Load inventory data when implemented
+                    break;
+                case 'accountability':
+                    // Load accountability data when implemented
+                    break;
+                case 'disposal':
+                    // Load disposal data when implemented
+                    break;
+                case 'reports':
+                    // Load reports data when implemented
+                    break;
+            }
+        }
 
         // Load dashboard data
         function loadDashboardData() {
