@@ -407,6 +407,13 @@
         function onDashboardDataLoaded(data) {
             hideLoading();
 
+            // Check if data exists first
+            if (!data) {
+                showAlert('Error: No data received from server. Please check your configuration and try again.', 'danger');
+                console.error('getDashboardData returned null');
+                return;
+            }
+
             if (data.error) {
                 showAlert('Error loading dashboard data: ' + data.error, 'danger');
                 return;
