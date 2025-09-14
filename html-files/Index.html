@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Asset Management Dashboard</title>
+    <?!= include('Styles'); ?>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">
+                    <i class="fas fa-laptop"></i> IT Asset Management
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="?page=dashboard">
+                                <i class="fas fa-tachometer-alt"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="?page=inventory">
+                                <i class="fas fa-boxes"></i> Inventory
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="?page=accountability">
+                                <i class="fas fa-clipboard-check"></i> Accountability
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="?page=disposal">
+                                <i class="fas fa-trash-alt"></i> Disposal
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="?page=reports">
+                                <i class="fas fa-chart-bar"></i> Reports
+                            </a>
+                        </li>
+                    </ul>
+                    <span class="navbar-text">
+                        <i class="fas fa-user"></i> <?= userEmail ?>
+                    </span>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="container-fluid mt-4">
+            <!-- System Alerts -->
+            <div id="alertsContainer" class="mb-4"></div>
+
+            <!-- Dashboard Header -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h1 class="h3">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                        <small class="text-muted">IT Asset Inventory Overview</small>
+                    </h1>
+                </div>
+            </div>
+
+            <!-- Key Metrics Cards -->
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Total Assets
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalAssets">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-boxes fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        Available Assets
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" id="availableAssets">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-info shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                        Assigned Assets
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" id="assignedAssets">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-user-check fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-warning shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                        Pending Actions
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" id="pendingActions">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="row mb-4">
+                <!-- Asset Status Chart -->
+                <div class="col-xl-6 col-lg-6">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Asset Status Distribution</h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="assetStatusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Asset Category Chart -->
+                <div class="col-xl-6 col-lg-6">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Asset Categories</h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="assetCategoryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity & Quick Actions -->
+            <div class="row">
+                <!-- Recent Activity -->
+                <div class="col-lg-8">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-history"></i> Recent Activity
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="recentActivity">
+                                <div class="text-center">
+                                    <i class="fas fa-spinner fa-spin"></i> Loading recent activity...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="col-lg-4">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-bolt"></i> Quick Actions
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <a href="?page=inventory" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> Add New Asset
+                                </a>
+                                <a href="?page=accountability" class="btn btn-success">
+                                    <i class="fas fa-user-plus"></i> Assign Asset
+                                </a>
+                                <a href="?page=disposal" class="btn btn-warning">
+                                    <i class="fas fa-trash"></i> Dispose Asset
+                                </a>
+                                <a href="?page=reports" class="btn btn-info">
+                                    <i class="fas fa-file-export"></i> Generate Report
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System Status -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-server"></i> System Status
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-2">
+                                <small class="text-muted">Last Updated:</small>
+                                <div id="lastUpdated" class="font-weight-bold">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <small class="text-muted">Total Employees:</small>
+                                <div id="totalEmployees" class="font-weight-bold">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <small class="text-muted">System Health:</small>
+                                <div class="font-weight-bold text-success">
+                                    <i class="fas fa-check-circle"></i> Operational
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Global variables
+        let dashboardData = {};
+        let charts = {};
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardData();
+        });
+
+        // Load dashboard data
+        function loadDashboardData() {
+            showLoading();
+
+            google.script.run
+                .withSuccessHandler(onDashboardDataLoaded)
+                .withFailureHandler(onError)
+                .getDashboardData();
+        }
+
+        // Handle dashboard data loaded
+        function onDashboardDataLoaded(data) {
+            hideLoading();
+
+            if (data.error) {
+                showAlert('Error loading dashboard data: ' + data.error, 'danger');
+                return;
+            }
+
+            dashboardData = data;
+            updateMetricCards(data.overview);
+            updateCharts(data.assetMetrics);
+            updateRecentActivity(data.recentActivity);
+            updateSystemAlerts(data.alerts);
+            updateSystemStatus(data.overview);
+        }
+
+        // Update metric cards
+        function updateMetricCards(overview) {
+            document.getElementById('totalAssets').textContent = overview.totalAssets || 0;
+            document.getElementById('availableAssets').textContent = overview.availableAssets || 0;
+            document.getElementById('assignedAssets').textContent = overview.assignedAssets || 0;
+            document.getElementById('pendingActions').textContent =
+                (overview.pendingAccountability || 0) + (overview.pendingDisposals || 0);
+            document.getElementById('totalEmployees').textContent = overview.totalEmployees || 0;
+            document.getElementById('lastUpdated').textContent = new Date().toLocaleString();
+        }
+
+        // Update charts
+        function updateCharts(metrics) {
+            // Asset Status Chart
+            const statusCtx = document.getElementById('assetStatusChart').getContext('2d');
+            if (charts.statusChart) {
+                charts.statusChart.destroy();
+            }
+
+            charts.statusChart = new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(metrics.byStatus || {}),
+                    datasets: [{
+                        data: Object.values(metrics.byStatus || {}),
+                        backgroundColor: [
+                            '#28a745', // Available - green
+                            '#007bff', // Assigned - blue
+                            '#ffc107', // Under Maintenance - yellow
+                            '#dc3545', // Disposed - red
+                            '#6c757d'  // Other - gray
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Asset Category Chart
+            const categoryCtx = document.getElementById('assetCategoryChart').getContext('2d');
+            if (charts.categoryChart) {
+                charts.categoryChart.destroy();
+            }
+
+            charts.categoryChart = new Chart(categoryCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(metrics.byCategory || {}),
+                    datasets: [{
+                        label: 'Assets',
+                        data: Object.values(metrics.byCategory || {}),
+                        backgroundColor: '#007bff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update recent activity
+        function updateRecentActivity(activities) {
+            const container = document.getElementById('recentActivity');
+
+            if (!activities || activities.length === 0) {
+                container.innerHTML = '<p class="text-muted">No recent activity</p>';
+                return;
+            }
+
+            let html = '<div class="list-group list-group-flush">';
+
+            activities.slice(0, 10).forEach(activity => {
+                const icon = getActivityIcon(activity.action);
+                const time = new Date(activity.timestamp).toLocaleString();
+
+                html += `
+                    <div class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">
+                                <i class="${icon}"></i> ${activity.details || activity.action}
+                            </h6>
+                            <small>${time}</small>
+                        </div>
+                        <p class="mb-1">User: ${activity.user}</p>
+                        <small>Entity: ${activity.entity} ${activity.entityId}</small>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // Update system alerts
+        function updateSystemAlerts(alerts) {
+            const container = document.getElementById('alertsContainer');
+
+            if (!alerts || alerts.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+
+            alerts.forEach(alert => {
+                const alertClass = getAlertClass(alert.type);
+                const icon = getAlertIcon(alert.type);
+
+                html += `
+                    <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                        <i class="${icon}"></i>
+                        <strong>${alert.title}:</strong> ${alert.message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Update system status
+        function updateSystemStatus(overview) {
+            // Already handled in updateMetricCards
+        }
+
+        // Helper functions
+        function getActivityIcon(action) {
+            const icons = {
+                'CREATE': 'fas fa-plus text-success',
+                'UPDATE': 'fas fa-edit text-primary',
+                'DELETE': 'fas fa-trash text-danger',
+                'ASSIGN': 'fas fa-user-plus text-info',
+                'RETURN': 'fas fa-undo text-warning'
+            };
+            return icons[action] || 'fas fa-info-circle text-secondary';
+        }
+
+        function getAlertClass(type) {
+            const classes = {
+                'error': 'alert-danger',
+                'warning': 'alert-warning',
+                'info': 'alert-info',
+                'success': 'alert-success'
+            };
+            return classes[type] || 'alert-secondary';
+        }
+
+        function getAlertIcon(type) {
+            const icons = {
+                'error': 'fas fa-exclamation-triangle',
+                'warning': 'fas fa-exclamation-circle',
+                'info': 'fas fa-info-circle',
+                'success': 'fas fa-check-circle'
+            };
+            return icons[type] || 'fas fa-bell';
+        }
+
+        function showLoading() {
+            // Loading indicators are already in place with spinners
+        }
+
+        function hideLoading() {
+            // Loading complete - data will replace spinners
+        }
+
+        function showAlert(message, type = 'info') {
+            const alertClass = getAlertClass(type);
+            const alertHtml = `
+                <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            document.getElementById('alertsContainer').insertAdjacentHTML('beforeend', alertHtml);
+        }
+
+        function onError(error) {
+            hideLoading();
+            showAlert('An error occurred: ' + error.toString(), 'danger');
+            console.error('Dashboard error:', error);
+        }
+
+        // Refresh dashboard every 5 minutes
+        setInterval(loadDashboardData, 5 * 60 * 1000);
+    </script>
+</body>
+</html>
